@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>logistic map</title>
+    <link rel="stylesheet" href="style.css">
+    <script defer src="script.js"></script>
+    <link rel="shortcut icon" href="favicon.png" type="image/png">
+</head>
+<body>
+    <header>logistic map</header>
+    <main>
+        <div id="cavas-div">
+            <canvas id="canvas1"></canvas>
+            <canvas id="canvas2"></canvas>
+        </div>
+        <div id="controls">
+            <p>Xn+1 = aXn * (1 - Xn) <a href="https://en.wikipedia.org/wiki/Logistic_map">(learn more)</a></p>
+            <label id="a-label" for="a">a = 1</label>
+            <input id="a" min="0" max="4" step="0.01" value="1" type="range">
+            <label id="Xo-label" for="Xo">Xo = 0.25</label>
+            <input id="Xo" min="0" max="1" step="0.01" value="0.25" type="range">
+            <label id="Xmax-label" for="Xmax">Xmax = 100</label>
+            <input id="Xmax" min="1" max="1000" step="1" value="100" type="range">
+            <label id="Xignore-label" for="Xignore">Xignore = 10</label>
+            <input id="Xignore" min="0" max="100" step="1" value="10" type="range">
+            <label id="stepsize-label" for="stepsize">step size = 0.1</label>
+            <input id="stepsize" min="0.01" max="1" step="0.01" value="0.1" type="range">
+            <label id="linewidth-label" for="linewidth">line width = 1</label>
+            <input id="linewidth" min="0.01" max="2" step="0.01" value="1" type="range">
+            <!-- <button onclick="update()" id="update-btn">update</button> -->
+        </div>
+    </main>
+    <footer>© 2024 Hilmar Lemcke. All rights reserved.</footer>
+</body>
+</html>
