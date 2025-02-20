@@ -76,16 +76,22 @@ class Canvas {
                 }
             })
     
-            this.canvas.addEventListener('mouseup', () => {
+            window.addEventListener('mouseup', () => {
                 this.isPanning = false
             })
     
             this.canvas.addEventListener('wheel', e => {
-                e.preventDefault()
-                const zoomAmount = -e.deltaY * 0.001
-                this.zoom = Math.max(this.zoom + zoomAmount, 1)
-                update()
-            })
+                e.preventDefault();
+                const mouseX = e.offsetX;
+                const mouseY = e.offsetY;
+                const zoomAmount = -e.deltaY * 0.001;
+                const newZoom = Math.max(this.zoom + zoomAmount, 1);
+                const scaleChange = newZoom / this.zoom;
+                this.panX = mouseX - (mouseX - this.panX) * scaleChange;
+                this.panY = mouseY - (mouseY - this.panY) * scaleChange;
+                this.zoom = newZoom;
+                update();
+            });
         }
     }
 }
@@ -109,11 +115,11 @@ function update_canvas1() {
 }
 
 function draw_line(just_line=false) {
+    canvas2.ctx.save()
     if (!just_line) {
         canvas2.ctx.clearRect(0, 0, canvas2.width, canvas2.height)
         canvas2.ctx.drawImage(canvas2.img, 0, 0)
     }
-    canvas2.ctx.save()
     canvas2.ctx.scale(canvas2.zoom, canvas2.zoom);
     canvas2.ctx.translate(canvas2.panX / canvas2.zoom, canvas2.panY / canvas2.zoom);
     canvas2.ctx.fillStyle = 'rgba(255, 0, 0, .5)'
@@ -122,37 +128,41 @@ function draw_line(just_line=false) {
 }
 
 function update() {
-    canvas2.ctx.clearRect(0, 0, canvas2.width, canvas2.height);
-    canvas2.ctx.save();
-    canvas2.ctx.scale(canvas2.zoom, canvas2.zoom);
-    canvas2.ctx.translate(canvas2.panX / canvas2.zoom, canvas2.panY / canvas2.zoom);
-    for (let i = 0; i < (4 / settings.stepsize + 1); i++) {
-        let xn = settings.xo;
-        let a = i * settings.stepsize;
-        let x_array = [];
-        for (let y = 0; y < settings.xmax; y++) {
-            if (y > settings.xignore) {
-                canvas2.ctx.fillRect(a * canvas2.width / 4, canvas2.height - xn * canvas2.height, settings.linewidth, settings.linewidth);
+    if (!canvas2.updating) {
+        canvas2.updating = true
+        canvas2.ctx.clearRect(0, 0, canvas2.width, canvas2.height);
+        canvas2.ctx.save();
+        canvas2.ctx.scale(canvas2.zoom, canvas2.zoom);
+        canvas2.ctx.translate(canvas2.panX / canvas2.zoom, canvas2.panY / canvas2.zoom);
+        for (let i = 0; i < (4 / settings.stepsize + 1); i++) {
+            let xn = settings.xo;
+            let a = i * settings.stepsize;
+            let x_array = [];
+            for (let y = 0; y < settings.xmax; y++) {
+                if (y > settings.xignore) {
+                    canvas2.ctx.fillRect(a * canvas2.width / 4, canvas2.height - xn * canvas2.height, settings.linewidth, settings.linewidth);
+                }
+                xn = a * xn * (1 - xn);
+                if (x_array.includes(xn)) {
+                    canvas2.ctx.save();
+                    canvas2.ctx.fillStyle = 'black';
+                    canvas2.ctx.fillRect(a * canvas2.width / 4, canvas2.height - xn * canvas2.height, settings.linewidth, settings.linewidth);
+                    canvas2.ctx.restore();
+                    break;
+                }
+                x_array.push(xn);
             }
-            xn = a * xn * (1 - xn);
-            if (x_array.includes(xn)) {
-                canvas2.ctx.save();
-                canvas2.ctx.fillStyle = 'black';
-                canvas2.ctx.fillRect(a * canvas2.width / 4, canvas2.height - xn * canvas2.height, settings.linewidth, settings.linewidth);
-                canvas2.ctx.restore();
-                break;
-            }
-            x_array.push(xn);
         }
+        const img_data = canvas2.canvas.toDataURL();
+        const img = new Image();
+        img.onload = function() {
+            canvas2.img = img;
+        }
+        img.src = img_data;
+        canvas2.ctx.restore();
+        draw_line(true)
+        canvas2.updating = false
     }
-    const img_data = canvas2.canvas.toDataURL();
-    const img = new Image();
-    img.onload = function() {
-        canvas2.img = img;
-    }
-    img.src = img_data;
-    canvas2.ctx.restore();
-    draw_line(true)
 }
 
 update_canvas1();
